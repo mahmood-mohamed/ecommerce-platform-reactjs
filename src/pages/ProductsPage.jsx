@@ -1,22 +1,51 @@
 import { useState, useEffect } from "react";
 import { getProducts, getCategories, filterProducts } from "../features/products/services/productService";
 import ProductCard from "../features/products/components/ProductCard";
+import { useSearchParams } from "react-router-dom";
 
 export default function ProductsPage() {
     const [products, setProducts] = useState([]);
     const [categories, setCategories] = useState([]);
     const [loading, setLoading] = useState(true);
 
-    const [search, setSearch] = useState("");
-    const [selectedCategory, setSelectedCategory] = useState("");
-    const [sortBy, setSortBy] = useState("title");
-    const [sortOrder, setSortOrder] = useState("asc");
-    const [currentPage, setCurrentPage] = useState(1);
+    const [searchParams, setSearchParams] = useSearchParams();
+
+    const [search, setSearch] = useState(() => searchParams.get("search") || "");
+    const [selectedCategory, setSelectedCategory] = useState(() => searchParams.get("category") || "");
+    const [sortBy, setSortBy] = useState(() => searchParams.get("sortBy") || "title");
+    const [sortOrder, setSortOrder] = useState(() => searchParams.get("sortOrder") || "asc");
+    const [currentPage, setCurrentPage] = useState(() => Number(searchParams.get("page")) || 1);
     const [totalPages, setTotalPages] = useState(1);
     const [minPrice, setMinPrice] = useState(0);
-    const [maxPrice, setMaxPrice] = useState(700);
+    const [maxPrice, setMaxPrice] = useState(1000);
     const [totalProducts, setTotalProducts] = useState(0);
 
+    // Sync URL to state when searchParams change (handles back/forward navigation)
+    useEffect(() => {
+        const urlSearch = searchParams.get("search") || "";
+        const urlCategory = searchParams.get("category") || "";
+        const urlSortBy = searchParams.get("sortBy") || "title";
+        const urlSortOrder = searchParams.get("sortOrder") || "asc";
+        const urlPage = Number(searchParams.get("page")) || 1;
+
+        setSearch(prev => prev !== urlSearch ? urlSearch : prev);
+        setSelectedCategory(prev => prev !== urlCategory ? urlCategory : prev);
+        setSortBy(prev => prev !== urlSortBy ? urlSortBy : prev);
+        setSortOrder(prev => prev !== urlSortOrder ? urlSortOrder : prev);
+        setCurrentPage(prev => prev !== urlPage ? urlPage : prev);
+    }, [searchParams]);
+
+    // Sync state to URL when filters change
+    useEffect(() => {
+        const params = new URLSearchParams();
+        if (search) params.set("search", search);
+        if (selectedCategory) params.set("category", selectedCategory);
+        if (sortBy !== "title") params.set("sortBy", sortBy);
+        if (sortOrder !== "asc") params.set("sortOrder", sortOrder);
+        if (currentPage !== 1) params.set("page", currentPage.toString());
+
+        setSearchParams(params);
+    }, [search, selectedCategory, sortBy, sortOrder, currentPage, setSearchParams]);
 
     useEffect(() => {
         async function loadProducts() {
