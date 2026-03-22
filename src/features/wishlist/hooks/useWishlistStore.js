@@ -1,23 +1,37 @@
 import { create } from "zustand";
+import { persist } from "zustand/middleware";
 
-const useWishlistStore = create((set, get) => ({
-    items: [],
+const useWishlistStore = create(
+    persist(
+        (set, get) => ({
+            items: [],
 
-    addToWishlist: (product) => {
-        const items = get().items;
-        const exists = items.find((item) => item.id === product.id);
-        if (exists) return;
-        set({ items: [...items, product] });
-    },
+            addToWishlist: (product) => {
+                const items = get().items;
+                const exists = items.find((item) => item.id === product.id);
+                if (exists) {
+                    get().removeFromWishlist(product.id);
+                } else {
+                    set({ items: [...items, product] });
+                }
+            },
 
-    // Partial implementation — students should complete this
-    removeFromWishlist: (productId) => { // eslint-disable-line no-unused-vars
-        // TODO: Implement removal logic
-    },
+            removeFromWishlist: (productId) => {
+                set({
+                    items: get().items.filter((item) => item.id !== productId)
+                });
+            },
 
-    isInWishlist: (productId) => {
-        return get().items.some((item) => item.id === productId);
-    },
-}));
+
+
+            isInWishlist: (productId) => {
+                return get().items.some((item) => item.id === productId);
+            },
+        }),
+        {
+            name: "wishlist-storage",
+        }
+    )
+);
 
 export default useWishlistStore;
