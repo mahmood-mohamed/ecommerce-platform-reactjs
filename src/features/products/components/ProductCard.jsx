@@ -67,7 +67,7 @@ export default function ProductCard({ product }) {
                         e.preventDefault();
                         addToWishlist(product);
                     }}
-                    className={`absolute top-3 right-3 p-2 rounded-full shadow-md transition-all duration-200 ${isInWishlist
+                    className={`absolute top-3 right-3 p-2 rounded-full shadow-md transition-all duration-200 cursor-pointer ${isInWishlist
                         ? "bg-accent-500 text-white"
                         : "bg-white/90 text-gray-400 hover:text-accent-500"
                         }`}
@@ -106,7 +106,7 @@ export default function ProductCard({ product }) {
                     <button
                         onClick={() => addToCart(product)}
                         disabled={product.stock === 0}
-                        className="px-3 py-1.5 bg-primary-600 text-white text-xs font-medium rounded-lg hover:bg-primary-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+                        className="px-3 py-1.5 bg-primary-600 text-white text-xs font-medium rounded-lg hover:bg-primary-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors cursor-pointer"
                     >
                         Add to Cart
                     </button>
