@@ -22,6 +22,9 @@ const useWishlistStore = create(
                 });
             },
 
+            clearWishlist: () => {
+                set({ items: [] });
+            },
 
 
             isInWishlist: (productId) => {

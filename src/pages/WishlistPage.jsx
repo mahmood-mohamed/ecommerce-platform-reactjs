@@ -3,9 +3,8 @@ import useWishlistStore from "../features/wishlist/hooks/useWishlistStore";
 import useCartStore from "../features/cart/hooks/useCartStore";
 
 export default function WishlistPage() {
-    const items = useWishlistStore((s) => s.items);
-    const removeFromWishlist = useWishlistStore((s) => s.removeFromWishlist);
-    const addToCart = useCartStore((s) => s.addToCart);
+    const { items, removeFromWishlist, clearWishlist } = useWishlistStore();
+    const { addToCart } = useCartStore();
 
     if (items.length === 0) {
         return (
@@ -41,11 +40,19 @@ export default function WishlistPage() {
 
     return (
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <div className="mb-8">
-                <h1 className="text-3xl font-bold text-gray-900">Wishlist</h1>
-                <p className="text-gray-500 mt-1">
-                    {items.length} item{items.length !== 1 ? "s" : ""} saved
-                </p>
+            <div className="flex justify-between items-center mb-8">
+                <div className="flex items-center gap-2">
+                    <h1 className="text-3xl font-bold text-gray-900">My Wishlist</h1>
+                    <p className="text-gray-500 text-sm mt-1">
+                        ( {items.length} item{items.length !== 1 ? "s" : ""} )
+                    </p>
+                </div>
+                <button
+                    onClick={() => clearWishlist()}
+                    className="px-3 py-2 border border-gray-200 rounded-lg text-gray-400 hover:text-red-500 hover:border-red-200 transition-all cursor-pointer"
+                >
+                    Clear Wishlist
+                </button>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
