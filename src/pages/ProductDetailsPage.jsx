@@ -3,6 +3,8 @@ import { useParams, Link } from "react-router-dom";
 import { getProductById } from "../features/products/services/productService";
 import useCartStore from "../features/cart/hooks/useCartStore";
 import useWishlistStore from "../features/wishlist/hooks/useWishlistStore";
+import ButtonWishlist from "../features/wishlist/components/ButtonWishlist";
+import ButtonCompare from "../features/compare/components/ButtonCompare";
 
 export default function ProductDetailsPage() {
     const { id } = useParams();
@@ -208,7 +210,7 @@ export default function ProductDetailsPage() {
                     </div>
 
                     {/* Actions */}
-                    <div className="flex gap-3 mt-auto">
+                    <div className="flex justify-between gap-3 mt-auto">
                         <button
                             onClick={() => addToCart(product)}
                             disabled={product.stock === 0}
@@ -216,21 +218,8 @@ export default function ProductDetailsPage() {
                         >
                             Add to Cart
                         </button>
-                        <button
-                            onClick={() => addToWishlist(product)}
-                            className={`px-4 py-3.5 rounded-xl border-2 transition-all ${isInWishlist
-                                ? "border-accent-500 bg-accent-50 text-accent-500"
-                                : "border-gray-200 text-gray-400 hover:border-accent-300 hover:text-accent-500"
-                                }`}
-                        >
-                            <svg className="w-5 h-5 fill-current" viewBox="0 0 20 20">
-                                <path
-                                    fillRule="evenodd"
-                                    d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z"
-                                    clipRule="evenodd"
-                                />
-                            </svg>
-                        </button>
+                        <ButtonWishlist product={product} className="rounded-xl px-6 py-3.5 border border-gray-200"/>
+                        <ButtonCompare product={product} showText={true} className="rounded-xl px-4 py-3.5 border border-gray-200 flex-1 sm:flex-initial"/>
                     </div>
 
                     {/* Reviews Placeholder — Student task to implement */}
