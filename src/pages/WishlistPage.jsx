@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import useWishlistStore from "../features/wishlist/hooks/useWishlistStore";
 import useCartStore from "../features/cart/hooks/useCartStore";
+import ButtonCompare from "../features/compare/components/ButtonCompare";
 
 export default function WishlistPage() {
     const { items, removeFromWishlist, clearWishlist } = useWishlistStore();
@@ -85,13 +86,13 @@ export default function WishlistPage() {
                                 <button
                                     onClick={() => {
                                         addToCart(item);
-                                        // Note: removeFromWishlist is not fully implemented
                                         removeFromWishlist(item.id);
                                     }}
                                     className="flex-1 py-2 bg-primary-600 text-white text-xs font-medium rounded-lg hover:bg-primary-700 transition-colors"
                                 >
                                     Move to Cart
                                 </button>
+                                <ButtonCompare product={item} className="rounded-lg px-3 py-2 border border-gray-200"/>
                                 <button
                                     onClick={() => removeFromWishlist(item.id)}
                                     className="px-3 py-2 border border-gray-200 rounded-lg text-gray-400 hover:text-red-500 hover:border-red-200 transition-all"
