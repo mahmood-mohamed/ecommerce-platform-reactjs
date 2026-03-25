@@ -1,10 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useParams, Link } from "react-router-dom";
 import { getProductById } from "../features/products/services/productService";
 import useCartStore from "../features/cart/hooks/useCartStore";
-import useWishlistStore from "../features/wishlist/hooks/useWishlistStore";
 import ButtonWishlist from "../features/wishlist/components/ButtonWishlist";
 import ButtonCompare from "../features/compare/components/ButtonCompare";
+import reviews from "../data/reviews";
+import Slider from "react-slick";
 
 export default function ProductDetailsPage() {
     const { id } = useParams();
@@ -12,8 +13,25 @@ export default function ProductDetailsPage() {
     const [loading, setLoading] = useState(true);
     const [countdown, setCountdown] = useState(null);
     const addToCart = useCartStore((s) => s.addToCart);
-    const addToWishlist = useWishlistStore((s) => s.addToWishlist);
-    const isInWishlist = useWishlistStore((s) => s.isInWishlist(Number(id)));
+
+    // We use useMemo so we don't re-filter on every countdown tick
+    const filteredReviews = useMemo(() => {
+        return reviews.filter(r => r.productId === Number(id));
+    }, [id]);
+
+    // Sort reviews by date (newest first)
+    const sortedReviews = filteredReviews.sort((a, b) => b.date - a.date);
+
+    const settings = {
+        dots: true,
+        infinite: true,
+        speed: 500,
+        slidesToShow: 1,
+        slidesToScroll: 1,
+        autoplay: true,
+        autoplaySpeed: 3000,
+    };
+
 
     useEffect(() => {
         async function load() {
@@ -68,7 +86,7 @@ export default function ProductDetailsPage() {
                 <svg
                     key={i}
                     className={`w-5 h-5 ${i <= Math.round(rating)
-                        ? "text-amber-400 fill-current"
+                        ? "text-amber-500 fill-current"
                         : "text-gray-300 fill-current"
                         }`}
                     viewBox="0 0 20 20"
@@ -96,7 +114,7 @@ export default function ProductDetailsPage() {
                 </h2>
                 <Link
                     to="/products"
-                    className="text-primary-600 hover:text-primary-700 font-medium"
+                    className="text-primary-600 inline-block mt-2 border-2 border-primary-600 rounded-full px-4 py-2 hover:text-primary-700 font-medium hover:bg-primary-600 hover:text-white transition-colors"
                 >
                     ← Back to Products
                 </Link>
@@ -126,15 +144,13 @@ export default function ProductDetailsPage() {
                 </span>
             </nav>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                 {/* Image */}
-                <div className="bg-white rounded-3xl overflow-hidden border border-gray-100 shadow-sm">
-                    <img
-                        src={product.thumbnail}
-                        alt={product.title}
-                        className="w-full aspect-square object-cover"
-                    />
-                </div>
+                <img
+                    src={product.thumbnail}
+                    alt={product.title}
+                    className="w-full border block border-gray-100 rounded-3xl shadow-sm aspect-square object-cover"
+                />
 
                 {/* Info */}
                 <div className="flex flex-col">
@@ -216,23 +232,60 @@ export default function ProductDetailsPage() {
                             disabled={product.stock === 0}
                             className="flex-1 px-6 py-3.5 bg-primary-600 text-white font-semibold rounded-xl hover:bg-primary-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
                         >
-                            Add to Cart
+                           🛒 Add to Cart
                         </button>
                         <ButtonWishlist product={product} className="rounded-xl px-6 py-3.5 border border-gray-200"/>
                         <ButtonCompare product={product} showText={true} className="rounded-xl px-4 py-3.5 border border-gray-200 flex-1 sm:flex-initial"/>
                     </div>
 
-                    {/* Reviews Placeholder — Student task to implement */}
-                    <div className="mt-10 border-t border-gray-100 pt-8">
-                        <h3 className="text-xl font-bold text-gray-900 mb-4">
-                            Customer Reviews
-                        </h3>
-                        <div className="bg-gray-50 rounded-xl p-6 text-center">
-                            <p className="text-gray-400 text-sm">
-                                Reviews will be displayed here.
+                    {/* --- REVIEWS SECTION START --- */}
+                    <div className="mt-10 border-t border-gray-100">
+                        <div className="mb-2 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
+                            <h3 className="text-xl font-bold text-gray-900">Customer Reviews</h3>
+                            <p className="text-sm text-gray-500 mt-1">
+                                {sortedReviews.length} verified experiences
                             </p>
                         </div>
+
+                        {/* Reviews are sorted newest first */}
+                        {sortedReviews.length > 0 ? (
+                            <div className="mb-4">
+                            <Slider {...settings}>
+                                {sortedReviews.map((review) => (
+                                    <div 
+                                        key={review.id} 
+                                        className="bg-gray-50 rounded-xl mt-2 p-6 border border-gray-200 hover:shadow-sm transition-all"
+                                    >
+                                        <div className="flex justify-between items-center mb-4">
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-10 h-10 rounded-full bg-primary-100 text-primary-700 flex items-center justify-center font-bold text-xs">
+                                                    {review.user.split(' ').map(n => n[0]).join('')}
+                                                </div>
+                                                <div>
+                                                    <p className="font-semibold text-gray-900 text-sm">{review.user}</p>
+                                                    <p className="text-xs text-gray-400">{new Date(review.date).toLocaleDateString()}</p>
+                                                </div>
+                                            </div>
+                                            <div className="flex text-amber-500">
+                                                {renderStars(review.rating)}
+                                            </div>
+                                        </div>
+                                        <p className="text-gray-600 leading-relaxed text-sm ">
+                                            "{review.comment}"
+                                        </p>
+                                    </div>
+                                ))}
+                            </Slider>
+                            </div>
+                        ) : (
+                            <div className="bg-gray-50 rounded-2xl p-12 text-center border-2 border-dashed border-gray-200">
+                                <p className="text-gray-400">No reviews yet for this product. Be the first to share your thoughts!</p>
+                            </div>
+                        )}
                     </div>
+                    {/* --- REVIEWS SECTION END --- */}
+
+
                 </div>
             </div>
         </div>
