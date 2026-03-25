@@ -1,3 +1,4 @@
+import { toast } from "react-toastify";
 import { create } from "zustand";
 
 const useCartStore = create((set, get) => ({
@@ -17,10 +18,12 @@ const useCartStore = create((set, get) => ({
                         : item
                 ),
             });
+            toast.success("Product quantity increased");
         } else {
             set({
                 items: [...items, { ...product, quantity: 1 }],
             });
+            toast.success("Product added to cart 🛒");
         }
     },
 
@@ -28,6 +31,7 @@ const useCartStore = create((set, get) => ({
         set({
             items: get().items.filter((item) => item.id !== productId),
         });
+        toast.success("Product removed from cart");
     },
 
     // BUG: This function does NOT prevent quantity from going to 0 or negative.

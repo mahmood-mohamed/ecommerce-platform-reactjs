@@ -1,3 +1,4 @@
+import { toast } from "react-toastify";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
@@ -13,6 +14,7 @@ const useWishlistStore = create(
                     get().removeFromWishlist(product.id);
                 } else {
                     set({ items: [...items, product] });
+                    toast.success("Product added to wishlist ❤️");
                 }
             },
 

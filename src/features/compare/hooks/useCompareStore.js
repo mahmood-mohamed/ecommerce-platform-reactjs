@@ -1,12 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import { toast } from "react-toastify";
 
-
-// Create a store for compare items using zustand and persist
-// Two items can be compared at a time if add more than two items it will remove the oldest item
-// store time when item is added to compare and remove the oldest item when new item is added
-// this error in console when i open the compare page solve it
-// in locale storage show like this >> compare-products	[object Object]
 const useCompareStore = create(
     persist(
         (set, get) => ({
@@ -26,6 +21,7 @@ const useCompareStore = create(
                         newItems.sort((a, b) => a.time - b.time); // Sort by time (oldest first)
                         newItems.shift(); // Remove the oldest
                     }
+                    toast.success("Product added to compare ⚖️");
 
                     return { items: newItems };
                 }),
