@@ -1,13 +1,16 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import useCartStore from "../features/cart/hooks/useCartStore";
+import * as Yup from "yup";
+import { useFormik } from "formik";
 
 export default function CheckoutPage() {
     const items = useCartStore((s) => s.items);
     const clearCart = useCartStore((s) => s.clearCart);
     const [orderPlaced, setOrderPlaced] = useState(false);
+    const [errMsgs, setErrMsgs] = useState({});
 
-    const [form, setForm] = useState({
+    const initialValues = {
         firstName: "",
         lastName: "",
         email: "",
@@ -16,23 +19,45 @@ export default function CheckoutPage() {
         city: "",
         zipCode: "",
         country: "",
+    };
+
+    function onSubmit(values) {
+        console.log(values);
+        validationSchema.validate(values, { abortEarly: false })
+            .then(() => {
+                clearCart();
+                setOrderPlaced(true);
+                setErrMsgs({});
+            })
+            .catch((err) => {
+                setErrMsgs(err.inner.reduce((acc, err) => {
+                    acc[err.path] = err.message;
+                    return acc;
+                }, {}));
+            });
+    }
+
+    const validationSchema = Yup.object({
+        firstName: Yup.string().required("First Name is required"),
+        lastName: Yup.string().required("Last Name is required"),
+        email: Yup.string().email("Please enter a valid email address").matches(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/, "Please enter a valid email address").required("Email is required"),
+        phone: Yup.string().matches(/^[\d\s\-\(\)\+]+$/, "Please enter a valid phone number").required("Phone is required"),
+        address: Yup.string().required("Address is required"),
+        city: Yup.string().required("City is required"),
+        zipCode: Yup.string().matches(/^[0-9]{5}$/, "Please enter a valid zip code").required("Zip Code is required"),
+        country: Yup.string().required("Country is required"),
+    });
+
+    const { values, handleChange, handleSubmit, errors, touched, handleBlur } = useFormik({
+        initialValues,
+        onSubmit,
+        validationSchema,
     });
 
     const totalPrice = items.reduce(
         (sum, item) => sum + item.price * item.quantity,
         0
     );
-
-    const handleChange = (e) => {
-        setForm({ ...form, [e.target.name]: e.target.value });
-    };
-
-    // No validation implemented — student task
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        clearCart();
-        setOrderPlaced(true);
-    };
 
     if (orderPlaced) {
         return (
@@ -113,11 +138,13 @@ export default function CheckoutPage() {
                                     <input
                                         type="text"
                                         name="firstName"
-                                        value={form.firstName}
+                                        value={values.firstName}
                                         onChange={handleChange}
-                                        className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                                        onBlur={handleBlur}
+                                        className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                                         placeholder="John"
                                     />
+                                    {errors.firstName && touched.firstName && <p className="text-red-500 text-sm">{errors.firstName}</p>}
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1.5">
@@ -126,11 +153,13 @@ export default function CheckoutPage() {
                                     <input
                                         type="text"
                                         name="lastName"
-                                        value={form.lastName}
+                                        value={values.lastName}
                                         onChange={handleChange}
-                                        className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                                        onBlur={handleBlur}
+                                        className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                                         placeholder="Doe"
                                     />
+                                    {errors.lastName && touched.lastName && <p className="text-red-500 text-sm">{errors.lastName}</p>}
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1.5">
@@ -139,11 +168,13 @@ export default function CheckoutPage() {
                                     <input
                                         type="email"
                                         name="email"
-                                        value={form.email}
+                                        value={values.email}
                                         onChange={handleChange}
-                                        className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                                        onBlur={handleBlur}
+                                        className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                                         placeholder="john@example.com"
                                     />
+                                    {errors.email && touched.email && <p className="text-red-500 text-sm">{errors.email}</p>}
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1.5">
@@ -152,11 +183,13 @@ export default function CheckoutPage() {
                                     <input
                                         type="tel"
                                         name="phone"
-                                        value={form.phone}
+                                        value={values.phone}
                                         onChange={handleChange}
-                                        className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                                        onBlur={handleBlur}
+                                        className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                                         placeholder="+1 (555) 000-0000"
                                     />
+                                    {errors.phone && touched.phone && <p className="text-red-500 text-sm">{errors.phone}</p>}
                                 </div>
                                 <div className="sm:col-span-2">
                                     <label className="block text-sm font-medium text-gray-700 mb-1.5">
@@ -165,11 +198,13 @@ export default function CheckoutPage() {
                                     <input
                                         type="text"
                                         name="address"
-                                        value={form.address}
+                                        value={values.address}
                                         onChange={handleChange}
-                                        className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                                        onBlur={handleBlur}
+                                        className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                                         placeholder="123 Main Street"
                                     />
+                                    {errors.address && touched.address && <p className="text-red-500 text-sm">{errors.address}</p>}
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1.5">
@@ -178,11 +213,13 @@ export default function CheckoutPage() {
                                     <input
                                         type="text"
                                         name="city"
-                                        value={form.city}
+                                        value={values.city}
                                         onChange={handleChange}
-                                        className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                                        onBlur={handleBlur}
+                                        className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                                         placeholder="New York"
                                     />
+                                    {errors.city && touched.city && <p className="text-red-500 text-sm">{errors.city}</p>}
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1.5">
@@ -191,11 +228,13 @@ export default function CheckoutPage() {
                                     <input
                                         type="text"
                                         name="zipCode"
-                                        value={form.zipCode}
+                                        value={values.zipCode}
                                         onChange={handleChange}
-                                        className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                                        onBlur={handleBlur}
+                                        className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                                         placeholder="10001"
                                     />
+                                    {errors.zipCode && touched.zipCode && <p className="text-red-500 text-sm">{errors.zipCode}</p>}
                                 </div>
                                 <div className="sm:col-span-2">
                                     <label className="block text-sm font-medium text-gray-700 mb-1.5">
@@ -203,18 +242,20 @@ export default function CheckoutPage() {
                                     </label>
                                     <select
                                         name="country"
-                                        value={form.country}
+                                        value={values.country}
                                         onChange={handleChange}
-                                        className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white"
+                                        onBlur={handleBlur}
+                                        className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white"
                                     >
-                                        <option value="">Select country</option>
-                                        <option value="US">United States</option>
-                                        <option value="CA">Canada</option>
-                                        <option value="UK">United Kingdom</option>
-                                        <option value="DE">Germany</option>
-                                        <option value="FR">France</option>
+                                        <option value="" className="text-gray-400">Select country</option>
+                                        <option value="US" className="text-gray-900">United States</option>
+                                        <option value="CA" className="text-gray-900">Canada</option>
+                                        <option value="UK" className="text-gray-900">United Kingdom</option>
+                                        <option value="DE" className="text-gray-900">Germany</option>
+                                        <option value="FR" className="text-gray-900">France</option>
                                         <option value="AU">Australia</option>
                                     </select>
+                                    {errors.country && touched.country && <p className="text-red-500 text-sm">{errors.country}</p>}
                                 </div>
                             </div>
                         </div>
