@@ -32,7 +32,7 @@ const useCartStore = create(
             set({
                 items: get().items.filter((item) => item.id !== productId),
             });
-            toast.success("Product removed from cart");
+            toast.success("Product removed from cart 🗑️");
         },
 
         updateQuantity: (productId, newQuantity) => {
@@ -53,17 +53,6 @@ const useCartStore = create(
         },
 
         clearCart: () => set({ items: [] }),
-
-        get totalItems() {
-            return get().items.reduce((sum, item) => sum + item.quantity, 0);
-        },
-
-        get totalPrice() {
-            return get().items.reduce(
-                (sum, item) => sum + item.price * item.quantity,
-                0
-            );
-        },
 
         getTotalItems: () => {
             return get().items.reduce((sum, item) => sum + item.quantity, 0);

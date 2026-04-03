@@ -5,10 +5,11 @@ import * as Yup from "yup";
 import { useFormik } from "formik";
 
 export default function CheckoutPage() {
-    const items = useCartStore((s) => s.items);
-    const clearCart = useCartStore((s) => s.clearCart);
+    const { items, getTotalPrice, clearCart } = useCartStore();
     const [orderPlaced, setOrderPlaced] = useState(false);
     const [errMsgs, setErrMsgs] = useState({});
+
+    const totalPrice = getTotalPrice();
 
     const initialValues = {
         firstName: "",
@@ -22,7 +23,6 @@ export default function CheckoutPage() {
     };
 
     function onSubmit(values) {
-        console.log(values);
         validationSchema.validate(values, { abortEarly: false })
             .then(() => {
                 clearCart();
@@ -38,13 +38,13 @@ export default function CheckoutPage() {
     }
 
     const validationSchema = Yup.object({
-        firstName: Yup.string().required("First Name is required"),
-        lastName: Yup.string().required("Last Name is required"),
-        email: Yup.string().email("Please enter a valid email address").matches(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/, "Please enter a valid email address").required("Email is required"),
-        phone: Yup.string().matches(/^[\d\s\-\(\)\+]+$/, "Please enter a valid phone number").required("Phone is required"),
-        address: Yup.string().required("Address is required"),
-        city: Yup.string().required("City is required"),
-        zipCode: Yup.string().matches(/^[0-9]{5}$/, "Please enter a valid zip code").required("Zip Code is required"),
+        firstName: Yup.string().trim().min(3, "First Name must be at least 3 characters").required("First Name is required"),
+        lastName: Yup.string().trim().min(3, "Last Name must be at least 3 characters").required("Last Name is required"),
+        email: Yup.string().trim().email("Please enter a valid email address").matches(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/, "Please enter a valid email address").required("Email is required"),
+        phone: Yup.string().trim().matches(/^[\d\s\-\(\)\+]+$/, "Please enter a valid phone number").required("Phone is required"),
+        address: Yup.string().trim().min(3, "Address must be at least 3 characters").required("Address is required"),
+        city: Yup.string().trim().min(3, "City must be at least 3 characters").required("City is required"),
+        zipCode: Yup.string().matches(/^[0-9]{5}$/, "Please enter a valid zip code (5 digits)").required("Zip Code is required"),
         country: Yup.string().required("Country is required"),
     });
 
@@ -53,11 +53,6 @@ export default function CheckoutPage() {
         onSubmit,
         validationSchema,
     });
-
-    const totalPrice = items.reduce(
-        (sum, item) => sum + item.price * item.quantity,
-        0
-    );
 
     if (orderPlaced) {
         return (
@@ -141,7 +136,7 @@ export default function CheckoutPage() {
                                         value={values.firstName}
                                         onChange={handleChange}
                                         onBlur={handleBlur}
-                                        className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                                        className={`w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent ${errors.firstName && touched.firstName ? "border-red-500" : ""}`}
                                         placeholder="John"
                                     />
                                     {errors.firstName && touched.firstName && <p className="text-red-500 text-sm">{errors.firstName}</p>}
@@ -156,7 +151,7 @@ export default function CheckoutPage() {
                                         value={values.lastName}
                                         onChange={handleChange}
                                         onBlur={handleBlur}
-                                        className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                                        className={`w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent ${errors.lastName && touched.lastName ? "border-red-500" : ""}`}
                                         placeholder="Doe"
                                     />
                                     {errors.lastName && touched.lastName && <p className="text-red-500 text-sm">{errors.lastName}</p>}
@@ -171,7 +166,7 @@ export default function CheckoutPage() {
                                         value={values.email}
                                         onChange={handleChange}
                                         onBlur={handleBlur}
-                                        className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                                        className={`w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent ${errors.email && touched.email ? "border-red-500" : ""}`}
                                         placeholder="john@example.com"
                                     />
                                     {errors.email && touched.email && <p className="text-red-500 text-sm">{errors.email}</p>}
@@ -186,7 +181,7 @@ export default function CheckoutPage() {
                                         value={values.phone}
                                         onChange={handleChange}
                                         onBlur={handleBlur}
-                                        className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                                        className={`w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent ${errors.phone && touched.phone ? "border-red-500" : ""}`}
                                         placeholder="+1 (555) 000-0000"
                                     />
                                     {errors.phone && touched.phone && <p className="text-red-500 text-sm">{errors.phone}</p>}
@@ -201,7 +196,7 @@ export default function CheckoutPage() {
                                         value={values.address}
                                         onChange={handleChange}
                                         onBlur={handleBlur}
-                                        className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                                        className={`w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent ${errors.address && touched.address ? "border-red-500" : ""}`}
                                         placeholder="123 Main Street"
                                     />
                                     {errors.address && touched.address && <p className="text-red-500 text-sm">{errors.address}</p>}
@@ -216,7 +211,7 @@ export default function CheckoutPage() {
                                         value={values.city}
                                         onChange={handleChange}
                                         onBlur={handleBlur}
-                                        className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                                        className={`w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent ${errors.city && touched.city ? "border-red-500" : ""}`}
                                         placeholder="New York"
                                     />
                                     {errors.city && touched.city && <p className="text-red-500 text-sm">{errors.city}</p>}
@@ -231,7 +226,7 @@ export default function CheckoutPage() {
                                         value={values.zipCode}
                                         onChange={handleChange}
                                         onBlur={handleBlur}
-                                        className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                                        className={`w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent ${errors.zipCode && touched.zipCode ? "border-red-500" : ""}`}
                                         placeholder="10001"
                                     />
                                     {errors.zipCode && touched.zipCode && <p className="text-red-500 text-sm">{errors.zipCode}</p>}
@@ -245,7 +240,7 @@ export default function CheckoutPage() {
                                         value={values.country}
                                         onChange={handleChange}
                                         onBlur={handleBlur}
-                                        className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white"
+                                        className={`w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white ${errors.country && touched.country ? "border-red-500" : ""}`}
                                     >
                                         <option value="" className="text-gray-400">Select country</option>
                                         <option value="US" className="text-gray-900">United States</option>
@@ -253,7 +248,7 @@ export default function CheckoutPage() {
                                         <option value="UK" className="text-gray-900">United Kingdom</option>
                                         <option value="DE" className="text-gray-900">Germany</option>
                                         <option value="FR" className="text-gray-900">France</option>
-                                        <option value="AU">Australia</option>
+                                        <option value="AU" className="text-gray-900">Australia</option>
                                     </select>
                                     {errors.country && touched.country && <p className="text-red-500 text-sm">{errors.country}</p>}
                                 </div>
@@ -311,7 +306,7 @@ export default function CheckoutPage() {
 
                             <button
                                 type="submit"
-                                className="mt-6 w-full py-3.5 bg-primary-600 text-white font-semibold rounded-xl hover:bg-primary-700 transition-colors"
+                                className={`mt-6 w-full py-3.5 bg-primary-600 text-white font-semibold rounded-xl hover:bg-primary-700 transition-colors ${Object.keys(errors).length > 0 ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
                             >
                                 Place Order
                             </button>
