@@ -110,6 +110,22 @@ export default function CheckoutPage() {
 
     return (
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <nav className="flex items-center gap-2 text-sm text-gray-500 mb-4">
+                <Link to="/" className="hover:text-primary-600 transition-colors">
+                    Home
+                </Link>
+                <span>/</span>
+                <Link
+                    to="/cart"
+                    className="hover:text-primary-600 transition-colors"
+                >
+                    Cart
+                </Link>
+                <span>/</span>
+                <span className="text-gray-800 font-medium truncate">
+                    Checkout
+                </span>
+            </nav>
             <div className="mb-8">
                 <h1 className="text-3xl font-bold text-gray-900">Checkout</h1>
                 <p className="text-gray-500 mt-1">
