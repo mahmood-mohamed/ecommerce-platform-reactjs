@@ -42,9 +42,16 @@ const useCartStore = create(
             if (!item) return;
 
             // Prevent exceeding stock
-            if (newQuantity > item.stock) return;
+            if (newQuantity > item.stock && item.stock > 0) {
+                toast.error(`Product quantity exceeds stock. Maximum quantity is ${item.stock}`);
+                return;
+            }
 
-            // BUG: No check for newQuantity <= 0
+            // Prevent quantity from going to 0 or negative
+            if (newQuantity <= 0) {
+                toast.error("Product quantity must be at least 1");
+                return;
+            }
             set({
                 items: items.map((i) =>
                     i.id === productId ? { ...i, quantity: newQuantity } : i
