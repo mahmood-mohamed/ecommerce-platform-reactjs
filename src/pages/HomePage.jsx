@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { getProducts, getCategories } from "../features/products/services/productService";
 import ProductCard from "../features/products/components/ProductCard";
+import ProductCardSkeleton from "../features/products/components/ProductCardSkeleton";
 
 export default function HomePage() {
     const [featuredProducts, setFeaturedProducts] = useState([]);
@@ -139,9 +140,15 @@ export default function HomePage() {
                         </Link>
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                        {featuredProducts.map((product) => (
-                            <ProductCard key={product.id} product={product} />
-                        ))}
+                        {featuredProducts.length > 0 ? (
+                            featuredProducts.map((product) => (
+                                <ProductCard key={product.id} product={product} />
+                            ))
+                        ) : (
+                            [...Array(4)].map((_, i) => (
+                                <ProductCardSkeleton key={i} />
+                            ))
+                        )}
                     </div>
                 </div>
             </section>
