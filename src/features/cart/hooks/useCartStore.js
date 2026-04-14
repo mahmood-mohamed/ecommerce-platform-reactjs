@@ -4,14 +4,22 @@ import { persist } from "zustand/middleware";
 const useCartStore = create(
     persist((set, get) => ({
         items: [],
+        lastActionTime: 0,
 
         addToCart: (product) => {
+            const now = Date.now();
+            if (now - get().lastActionTime < 500) return; // Prevent rapid clicks
+            set({ lastActionTime: now });
+
             const items = get().items;
             const existingItem = items.find((item) => item.id === product.id);
 
             if (existingItem) {
                 // Prevent exceeding stock
-                if (existingItem.quantity >= product.stock) return;
+                if (existingItem.quantity >= product.stock) {
+                    toast.error("⚠️ Maximum stock reached");
+                    return;
+                };
                 set({
                     items: items.map((item) =>
                         item.id === product.id
@@ -19,20 +27,22 @@ const useCartStore = create(
                             : item
                     ),
                 });
-                toast.success("Product quantity increased");
+                toast.success("Quantity updated 🛒⬆️");
             } else {
                 set({
                     items: [...items, { ...product, quantity: 1 }],
                 });
-                toast.success("Product added to cart 🛒");
+                toast.success("Added to cart 🛒");
             }
         },
 
         removeFromCart: (productId) => {
+            const items = get().items;
+            const item = items.find((i) => i.id === productId);
             set({
                 items: get().items.filter((item) => item.id !== productId),
             });
-            toast.success("Product removed from cart 🗑️");
+            toast.info(`Removed ${item?.title.slice(0, 20) + "..." || "item"} from cart 🗑️`);
         },
 
         updateQuantity: (productId, newQuantity) => {
@@ -43,13 +53,13 @@ const useCartStore = create(
 
             // Prevent exceeding stock
             if (newQuantity > item.stock && item.stock > 0) {
-                toast.error(`Product quantity exceeds stock. Maximum quantity is ${item.stock}`);
+                toast.error(`Max available: ${item.stock}`);
                 return;
             }
 
             // Prevent quantity from going to 0 or negative
             if (newQuantity <= 0) {
-                toast.error("Product quantity must be at least 1");
+                toast.error("Minimum quantity is 1");
                 return;
             }
             set({
@@ -57,9 +67,13 @@ const useCartStore = create(
                     i.id === productId ? { ...i, quantity: newQuantity } : i
                 ),
             });
+            toast.success("Cart updated 🛒🔄");
         },
 
-        clearCart: () => set({ items: [] }),
+        clearCart: () => {
+            set({ items: [] })
+            toast.success("Cart cleared 🧹");
+        },
 
         getTotalItems: () => {
             return get().items.reduce((sum, item) => sum + item.quantity, 0);

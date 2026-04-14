@@ -26,20 +26,24 @@ const useCompareStore = create(
                     return { items: newItems };
                 }),
 
-            removeFromCompare: (productId) =>
+            removeFromCompare: (productId) => {
                 set((state) => ({
                     items: state.items.filter((item) => item.product.id !== productId),
-                })),
+                }));
+                toast.info("Removed from compare ⚖️");
+            },
 
             isItemInCompare: (productId) =>
                 get().items.some((item) => item.product.id === productId),
 
             compareList: () => get().items.map((item) => item.product),
 
-            clearCompare: () =>
+            clearCompare: () => {
                 set(() => ({
                     items: [],
-                })),
+                }));
+                toast.success("Compare list cleared 🧹");
+            },
         }),
         {
             name: "compare-storage", // Changed name slightly to avoid old buggy data
