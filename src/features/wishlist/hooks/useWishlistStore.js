@@ -14,7 +14,7 @@ const useWishlistStore = create(
                     get().removeFromWishlist(product.id);
                 } else {
                     set({ items: [...items, product] });
-                    toast.success("Product added to wishlist ❤️");
+                    toast.success("Added to wishlist ❤️");
                 }
             },
 
@@ -22,10 +22,12 @@ const useWishlistStore = create(
                 set({
                     items: get().items.filter((item) => item.id !== productId)
                 });
+                toast.info("Removed from wishlist 💔");
             },
 
             clearWishlist: () => {
                 set({ items: [] });
+                toast.success("Wishlist cleared 🧹");
             },
 
 
