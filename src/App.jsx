@@ -7,6 +7,7 @@ import CartPage from "./pages/CartPage";
 import WishlistPage from "./pages/WishlistPage";
 import ComparePage from "./pages/ComparePage";
 import CheckoutPage from "./pages/CheckoutPage";
+import { ToastContainer } from "react-toastify";
 
 export default function App() {
   return (
@@ -22,6 +23,16 @@ export default function App() {
           <Route path="checkout" element={<CheckoutPage />} />
         </Route>
       </Routes>
+      <ToastContainer
+        position="top-right"
+        autoClose={2500}
+        hideProgressBar={false}
+        newestOnTop
+        closeOnClick
+        pauseOnHover
+        draggable
+        theme="light"
+      />
     </BrowserRouter>
   );
 }

@@ -1,13 +1,17 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import useCartStore from "../features/cart/hooks/useCartStore";
+import * as Yup from "yup";
+import { useFormik } from "formik";
 
 export default function CheckoutPage() {
-    const items = useCartStore((s) => s.items);
-    const clearCart = useCartStore((s) => s.clearCart);
+    const { items, getTotalPrice, clearCart } = useCartStore();
     const [orderPlaced, setOrderPlaced] = useState(false);
+    const [errMsgs, setErrMsgs] = useState({});
 
-    const [form, setForm] = useState({
+    const totalPrice = getTotalPrice();
+
+    const initialValues = {
         firstName: "",
         lastName: "",
         email: "",
@@ -16,23 +20,39 @@ export default function CheckoutPage() {
         city: "",
         zipCode: "",
         country: "",
+    };
+
+    function onSubmit(values) {
+        validationSchema.validate(values, { abortEarly: false })
+            .then(() => {
+                clearCart();
+                setOrderPlaced(true);
+                setErrMsgs({});
+            })
+            .catch((err) => {
+                setErrMsgs(err.inner.reduce((acc, err) => {
+                    acc[err.path] = err.message;
+                    return acc;
+                }, {}));
+            });
+    }
+
+    const validationSchema = Yup.object({
+        firstName: Yup.string().trim().min(3, "First Name must be at least 3 characters").required("First Name is required"),
+        lastName: Yup.string().trim().min(3, "Last Name must be at least 3 characters").required("Last Name is required"),
+        email: Yup.string().trim().email("Please enter a valid email address").matches(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/, "Please enter a valid email address").required("Email is required"),
+        phone: Yup.string().trim().matches(/^[\d\s\-\(\)\+]+$/, "Please enter a valid phone number").required("Phone is required"),
+        address: Yup.string().trim().min(3, "Address must be at least 3 characters").required("Address is required"),
+        city: Yup.string().trim().min(3, "City must be at least 3 characters").required("City is required"),
+        zipCode: Yup.string().matches(/^[0-9]{5}$/, "Please enter a valid zip code (5 digits)").required("Zip Code is required"),
+        country: Yup.string().required("Country is required"),
     });
 
-    const totalPrice = items.reduce(
-        (sum, item) => sum + item.price * item.quantity,
-        0
-    );
-
-    const handleChange = (e) => {
-        setForm({ ...form, [e.target.name]: e.target.value });
-    };
-
-    // No validation implemented — student task
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        clearCart();
-        setOrderPlaced(true);
-    };
+    const { values, handleChange, handleSubmit, errors, touched, handleBlur } = useFormik({
+        initialValues,
+        onSubmit,
+        validationSchema,
+    });
 
     if (orderPlaced) {
         return (
@@ -90,6 +110,22 @@ export default function CheckoutPage() {
 
     return (
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <nav className="flex items-center gap-2 text-sm text-gray-500 mb-4">
+                <Link to="/" className="hover:text-primary-600 transition-colors">
+                    Home
+                </Link>
+                <span>/</span>
+                <Link
+                    to="/cart"
+                    className="hover:text-primary-600 transition-colors"
+                >
+                    Cart
+                </Link>
+                <span>/</span>
+                <span className="text-gray-800 font-medium truncate">
+                    Checkout
+                </span>
+            </nav>
             <div className="mb-8">
                 <h1 className="text-3xl font-bold text-gray-900">Checkout</h1>
                 <p className="text-gray-500 mt-1">
@@ -113,11 +149,13 @@ export default function CheckoutPage() {
                                     <input
                                         type="text"
                                         name="firstName"
-                                        value={form.firstName}
+                                        value={values.firstName}
                                         onChange={handleChange}
-                                        className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                                        onBlur={handleBlur}
+                                        className={`w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent ${errors.firstName && touched.firstName ? "border-red-500" : ""}`}
                                         placeholder="John"
                                     />
+                                    {errors.firstName && touched.firstName && <p className="text-red-500 text-sm">{errors.firstName}</p>}
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1.5">
@@ -126,11 +164,13 @@ export default function CheckoutPage() {
                                     <input
                                         type="text"
                                         name="lastName"
-                                        value={form.lastName}
+                                        value={values.lastName}
                                         onChange={handleChange}
-                                        className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                                        onBlur={handleBlur}
+                                        className={`w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent ${errors.lastName && touched.lastName ? "border-red-500" : ""}`}
                                         placeholder="Doe"
                                     />
+                                    {errors.lastName && touched.lastName && <p className="text-red-500 text-sm">{errors.lastName}</p>}
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1.5">
@@ -139,11 +179,13 @@ export default function CheckoutPage() {
                                     <input
                                         type="email"
                                         name="email"
-                                        value={form.email}
+                                        value={values.email}
                                         onChange={handleChange}
-                                        className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                                        onBlur={handleBlur}
+                                        className={`w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent ${errors.email && touched.email ? "border-red-500" : ""}`}
                                         placeholder="john@example.com"
                                     />
+                                    {errors.email && touched.email && <p className="text-red-500 text-sm">{errors.email}</p>}
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1.5">
@@ -152,11 +194,13 @@ export default function CheckoutPage() {
                                     <input
                                         type="tel"
                                         name="phone"
-                                        value={form.phone}
+                                        value={values.phone}
                                         onChange={handleChange}
-                                        className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                                        onBlur={handleBlur}
+                                        className={`w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent ${errors.phone && touched.phone ? "border-red-500" : ""}`}
                                         placeholder="+1 (555) 000-0000"
                                     />
+                                    {errors.phone && touched.phone && <p className="text-red-500 text-sm">{errors.phone}</p>}
                                 </div>
                                 <div className="sm:col-span-2">
                                     <label className="block text-sm font-medium text-gray-700 mb-1.5">
@@ -165,11 +209,13 @@ export default function CheckoutPage() {
                                     <input
                                         type="text"
                                         name="address"
-                                        value={form.address}
+                                        value={values.address}
                                         onChange={handleChange}
-                                        className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                                        onBlur={handleBlur}
+                                        className={`w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent ${errors.address && touched.address ? "border-red-500" : ""}`}
                                         placeholder="123 Main Street"
                                     />
+                                    {errors.address && touched.address && <p className="text-red-500 text-sm">{errors.address}</p>}
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1.5">
@@ -178,11 +224,13 @@ export default function CheckoutPage() {
                                     <input
                                         type="text"
                                         name="city"
-                                        value={form.city}
+                                        value={values.city}
                                         onChange={handleChange}
-                                        className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                                        onBlur={handleBlur}
+                                        className={`w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent ${errors.city && touched.city ? "border-red-500" : ""}`}
                                         placeholder="New York"
                                     />
+                                    {errors.city && touched.city && <p className="text-red-500 text-sm">{errors.city}</p>}
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1.5">
@@ -191,11 +239,13 @@ export default function CheckoutPage() {
                                     <input
                                         type="text"
                                         name="zipCode"
-                                        value={form.zipCode}
+                                        value={values.zipCode}
                                         onChange={handleChange}
-                                        className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                                        onBlur={handleBlur}
+                                        className={`w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent ${errors.zipCode && touched.zipCode ? "border-red-500" : ""}`}
                                         placeholder="10001"
                                     />
+                                    {errors.zipCode && touched.zipCode && <p className="text-red-500 text-sm">{errors.zipCode}</p>}
                                 </div>
                                 <div className="sm:col-span-2">
                                     <label className="block text-sm font-medium text-gray-700 mb-1.5">
@@ -203,18 +253,20 @@ export default function CheckoutPage() {
                                     </label>
                                     <select
                                         name="country"
-                                        value={form.country}
+                                        value={values.country}
                                         onChange={handleChange}
-                                        className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white"
+                                        onBlur={handleBlur}
+                                        className={`w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white ${errors.country && touched.country ? "border-red-500" : ""}`}
                                     >
-                                        <option value="">Select country</option>
-                                        <option value="US">United States</option>
-                                        <option value="CA">Canada</option>
-                                        <option value="UK">United Kingdom</option>
-                                        <option value="DE">Germany</option>
-                                        <option value="FR">France</option>
-                                        <option value="AU">Australia</option>
+                                        <option value="" className="text-gray-400">Select country</option>
+                                        <option value="US" className="text-gray-900">United States</option>
+                                        <option value="CA" className="text-gray-900">Canada</option>
+                                        <option value="UK" className="text-gray-900">United Kingdom</option>
+                                        <option value="DE" className="text-gray-900">Germany</option>
+                                        <option value="FR" className="text-gray-900">France</option>
+                                        <option value="AU" className="text-gray-900">Australia</option>
                                     </select>
+                                    {errors.country && touched.country && <p className="text-red-500 text-sm">{errors.country}</p>}
                                 </div>
                             </div>
                         </div>
@@ -270,7 +322,7 @@ export default function CheckoutPage() {
 
                             <button
                                 type="submit"
-                                className="mt-6 w-full py-3.5 bg-primary-600 text-white font-semibold rounded-xl hover:bg-primary-700 transition-colors"
+                                className={`mt-6 w-full py-3.5 bg-primary-600 text-white font-semibold rounded-xl hover:bg-primary-700 transition-colors ${Object.keys(errors).length > 0 ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
                             >
                                 Place Order
                             </button>

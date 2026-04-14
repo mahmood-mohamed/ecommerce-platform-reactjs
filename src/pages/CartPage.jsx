@@ -48,15 +48,15 @@ export default function CartPage() {
     return (
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <div className="flex items-center justify-between mb-8">
-                <div>
-                    <h1 className="text-3xl font-bold text-gray-900">Shopping Cart</h1>
-                    <p className="text-gray-500 mt-1">
-                        {totalItems} item{totalItems !== 1 ? "s" : ""} in your cart
+                <div className="flex items-center gap-2">
+                    <h1 className="text-3xl font-bold text-gray-900">My Cart</h1>
+                    <p className="text-gray-500 text-sm mt-1">
+                        ( {totalItems} item{totalItems !== 1 ? "s" : ""} )
                     </p>
                 </div>
                 <button
                     onClick={clearCart}
-                    className="text-sm text-red-500 hover:text-red-600 font-medium transition-colors"
+                    className="px-3 py-2 border border-gray-200 rounded-lg text-gray-400 hover:text-red-500 hover:border-red-200 transition-all cursor-pointer"
                 >
                     Clear All
                 </button>
@@ -95,19 +95,21 @@ export default function CartPage() {
                                         </p>
                                     </div>
                                     <button
+                                        aria-label="Remove item from cart"
                                         onClick={() => removeFromCart(item.id)}
-                                        className="text-gray-400 hover:text-red-500 transition-colors shrink-0"
+                                        className="text-gray-400 bg-gray-50 p-2 rounded-full hover:bg-red-100 hover:text-red-500 transition-colors shrink-0 cursor-pointer"
                                     >
                                         <svg
-                                            className="w-5 h-5"
+                                            className="w-4 h-4"
                                             fill="none"
+                                            strokeWidth={2}
                                             stroke="currentColor"
                                             viewBox="0 0 24 24"
                                         >
                                             <path
                                                 strokeLinecap="round"
                                                 strokeLinejoin="round"
-                                                strokeWidth={2}
+                                                strokeWidth={3}
                                                 d="M6 18L18 6M6 6l12 12"
                                             />
                                         </svg>
@@ -116,12 +118,13 @@ export default function CartPage() {
 
                                 <div className="flex flex-wrap gap-1 items-center justify-between mt-3">
                                     <div className="flex items-center border border-gray-200 rounded-lg">
-                                        {/* BUG: Quantity can go to 0 or negative */}
                                         <button
+                                            aria-label="Decrease quantity"
                                             onClick={() =>
                                                 updateQuantity(item.id, item.quantity - 1)
                                             }
-                                            className="w-8 h-8 flex items-center justify-center text-gray-500 hover:text-primary-600 transition-colors"
+                                            disabled={item.quantity === 1}
+                                            className="w-8 h-8 flex items-center justify-center text-gray-500 hover:text-primary-600 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                                         >
                                             −
                                         </button>
@@ -129,10 +132,12 @@ export default function CartPage() {
                                             {item.quantity}
                                         </span>
                                         <button
+                                            aria-label="Increase quantity"
                                             onClick={() =>
                                                 updateQuantity(item.id, item.quantity + 1)
                                             }
-                                            className="w-8 h-8 flex items-center justify-center text-gray-500 hover:text-primary-600 transition-colors"
+                                            disabled={item.quantity === item.stock}
+                                            className="w-8 h-8 flex items-center justify-center text-gray-500 hover:text-primary-600 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                                         >
                                             +
                                         </button>

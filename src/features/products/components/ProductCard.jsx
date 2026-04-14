@@ -1,12 +1,11 @@
 import { Link } from "react-router-dom";
 import useCartStore from "../../cart/hooks/useCartStore";
-import useWishlistStore from "../../wishlist/hooks/useWishlistStore";
+import ButtonCompare from "../../compare/components/ButtonCompare";
+import ButtonWishlist from "../../wishlist/components/ButtonWishlist";
 
 export default function ProductCard({ product }) {
     const addToCart = useCartStore((s) => s.addToCart);
-    const addToWishlist = useWishlistStore((s) => s.addToWishlist);
-    const isInWishlist = useWishlistStore((s) => s.isInWishlist(product.id));
-
+   
     const renderStars = (rating) => {
         const stars = [];
         const full = Math.floor(rating);
@@ -61,25 +60,8 @@ export default function ProductCard({ product }) {
                         Out of Stock
                     </span>
                 )}
-                {/* Wishlist button */}
-                <button
-                    onClick={(e) => {
-                        e.preventDefault();
-                        addToWishlist(product);
-                    }}
-                    className={`absolute top-3 right-3 p-2 rounded-full shadow-md transition-all duration-200 ${isInWishlist
-                        ? "bg-accent-500 text-white"
-                        : "bg-white/90 text-gray-400 hover:text-accent-500"
-                        }`}
-                >
-                    <svg className="w-4 h-4 fill-current" viewBox="0 0 20 20">
-                        <path
-                            fillRule="evenodd"
-                            d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z"
-                            clipRule="evenodd"
-                        />
-                    </svg>
-                </button>
+                <ButtonWishlist product={product} className="absolute top-3 right-3" />
+                <ButtonCompare product={product} className="absolute top-14 right-3" />
             </Link>
 
             {/* Content */}
@@ -106,7 +88,7 @@ export default function ProductCard({ product }) {
                     <button
                         onClick={() => addToCart(product)}
                         disabled={product.stock === 0}
-                        className="px-3 py-1.5 bg-primary-600 text-white text-xs font-medium rounded-lg hover:bg-primary-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+                        className="px-3 py-1.5 bg-primary-600 text-white text-xs font-medium rounded-lg hover:bg-primary-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors cursor-pointer"
                     >
                         Add to Cart
                     </button>

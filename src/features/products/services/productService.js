@@ -50,7 +50,7 @@ export async function filterProducts({
 
     // Apply search
     if (search) {
-        const searchLower = search.toLowerCase();
+        const searchLower = search.trim().toLowerCase();
         filtered = filtered.filter(
             (p) =>
                 p.title.toLowerCase().includes(searchLower) ||
