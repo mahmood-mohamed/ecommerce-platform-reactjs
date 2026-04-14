@@ -6,6 +6,7 @@ import ButtonWishlist from "../features/wishlist/components/ButtonWishlist";
 import ButtonCompare from "../features/compare/components/ButtonCompare";
 import reviews from "../data/reviews";
 import Slider from "react-slick";
+import ProductDetailsSkeleton from "../features/products/components/ProductDetailsSkeleton";
 
 export default function ProductDetailsPage() {
     const { id } = useParams();
@@ -100,9 +101,7 @@ export default function ProductDetailsPage() {
 
     if (loading) {
         return (
-            <div className="flex items-center justify-center min-h-[60vh]">
-                <div className="w-12 h-12 border-4 border-primary-200 border-t-primary-600 rounded-full animate-spin" />
-            </div>
+            <ProductDetailsSkeleton />
         );
     }
 
@@ -283,8 +282,6 @@ export default function ProductDetailsPage() {
                             </div>
                         )}
                     </div>
-                    {/* --- REVIEWS SECTION END --- */}
-
 
                 </div>
             </div>
